@@ -25,6 +25,8 @@ pub(crate) struct Topbar {
     pub casting_host: gtk::Box,
     mini_title: adw::WindowTitle,
     mini: std::cell::Cell<bool>,
+    current_source_icon: gtk::Image,
+    current_source_label: gtk::Label,
 }
 
 impl Topbar {
@@ -105,6 +107,8 @@ impl Topbar {
             playback_targets: gtk::Box,
             casting_host: gtk::Box,
             mini_title: adw::WindowTitle,
+            current_source_icon: gtk::Image,
+            current_source_label: gtk::Label,
         });
         crate::widgets::controls::configure_search_entry(&search);
         window_content.remove(&header);
@@ -131,6 +135,8 @@ impl Topbar {
             playback_targets,
             casting_host,
             mini_title,
+            current_source_icon,
+            current_source_label,
             mini: std::cell::Cell::new(false),
         }
     }
@@ -140,6 +146,14 @@ impl Topbar {
         self.mini_title.set_title(title);
         self.mini_title.set_subtitle(artist);
     }
+
+    // For passing data on update of the library
+    pub fn refresh_current_source(&self, shell: &Shell) {
+        let (name, icon) = crate::preferences::preferences::source::selector::current_source_label(shell);
+        self.current_source_label.set_label(&name);
+        self.current_source_icon.set_icon_name(Some(icon));
+    }
+
 
     /// A narrow window keeps navigation and search; the controller and output buttons move to the
     /// fullscreen player's bar. The mini player keeps only the window controls and what is playing.
