@@ -4,6 +4,9 @@ use adw::prelude::*;
 
 use super::{Shell, layout::ResolvedLeftSidebarMode};
 
+/// Below this window width the top bar hides the current library's name and icon.
+pub const CURRENT_SOURCE_MIN_WIDTH: i32 = 900;
+
 pub(crate) struct Topbar {
     pub window_content: gtk::Box,
     pub content_host: adw::Bin,
@@ -25,6 +28,7 @@ pub(crate) struct Topbar {
     pub casting_host: gtk::Box,
     mini_title: adw::WindowTitle,
     mini: std::cell::Cell<bool>,
+    current_source: gtk::Box,
     current_source_icon: gtk::Image,
     current_source_label: gtk::Label,
 }
@@ -107,6 +111,7 @@ impl Topbar {
             playback_targets: gtk::Box,
             casting_host: gtk::Box,
             mini_title: adw::WindowTitle,
+            current_source: gtk::Box,
             current_source_icon: gtk::Image,
             current_source_label: gtk::Label,
         });
@@ -135,6 +140,7 @@ impl Topbar {
             playback_targets,
             casting_host,
             mini_title,
+            current_source,
             current_source_icon,
             current_source_label,
             mini: std::cell::Cell::new(false),
@@ -149,21 +155,29 @@ impl Topbar {
 
     // For passing data on update of the library
     pub fn refresh_current_source(&self, shell: &Shell) {
-        let (name, icon) = crate::preferences::preferences::source::selector::current_source_label(shell);
+        let (name, icon) =
+            crate::preferences::preferences::source::selector::current_source_label(shell);
         self.current_source_label.set_label(&name);
         self.current_source_icon.set_icon_name(Some(icon));
     }
 
-
     /// A narrow window keeps navigation and search; the controller and output buttons move to the
     /// fullscreen player's bar. The mini player keeps only the window controls and what is playing.
-    pub fn apply_window_size(&self, narrow: bool, mini: bool, playback_targets_host: &gtk::Box) {
+    pub fn apply_window_size(
+        &self,
+        width: i32,
+        narrow: bool,
+        mini: bool,
+        playback_targets_host: &gtk::Box,
+    ) {
         if narrow {
             self.header.add_css_class("narrow");
         } else {
             self.header.remove_css_class("narrow");
         }
         self.forward.set_visible(!narrow);
+        self.current_source
+            .set_visible(!narrow && width >= CURRENT_SOURCE_MIN_WIDTH);
         let targets_host = if narrow || mini {
             playback_targets_host
         } else {

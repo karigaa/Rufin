@@ -115,7 +115,6 @@ pub(crate) fn current_source_label(shell: &Shell) -> (String, &'static str) {
     (content.name, content.icon_name)
 }
 
-
 pub(crate) fn source_submenu(shell: &Rc<Shell>) -> (String, &'static str, gio::Menu) {
     let configured = shell.source.configured.borrow();
     let selected = shell.selected_library();
